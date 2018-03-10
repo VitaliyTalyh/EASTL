@@ -247,6 +247,11 @@ int TEST_STRING_NAME()
 			}
 
 			{
+				VERIFY(StringViewT(LITERAL("Aa")).compare(StringViewT(LITERAL("A"))) > 0);
+				VERIFY(StringViewT(LITERAL("A")).compare(StringViewT(LITERAL("Aa"))) < 0);
+			}
+
+			{
 				StringViewT sw1(LITERAL("Hello, World"));
 				StringViewT sw2(LITERAL("Hello, WWorld"));
 				StringViewT sw3(LITERAL("Hello, Wzorld"));
@@ -283,7 +288,7 @@ int TEST_STRING_NAME()
 		{
 			StringViewT sw(LITERAL("*** Hello"));
 			VERIFY(sw.compare(4, 5, LITERAL("Hello")) == 0);
-			VERIFY(sw.compare(4, 5, LITERAL("Hello 555")) == 0);
+			VERIFY(sw.compare(4, 5, LITERAL("Hello 555")) != 0);
 			VERIFY(sw.compare(4, 5, LITERAL("hello")) != 0);
 		}
 
@@ -292,7 +297,7 @@ int TEST_STRING_NAME()
 			StringViewT sw(LITERAL("*** Hello ***"));
 			VERIFY(sw.compare(4, 5, LITERAL("Hello"), 5) == 0);
 			VERIFY(sw.compare(0, 1, LITERAL("*"), 1) == 0);
-			VERIFY(sw.compare(0, 2, LITERAL("**"), 1) == 0);
+			VERIFY(sw.compare(0, 2, LITERAL("**"), 1) != 0);
 			VERIFY(sw.compare(0, 2, LITERAL("**"), 2) == 0);
 			VERIFY(sw.compare(0, 2, LITERAL("^^"), 2) != 0);
 		}
@@ -453,7 +458,14 @@ int TEST_STRING_NAME()
 		// template<> struct hash<std::u16string_view>;
 		// template<> struct hash<std::u32string_view>;
 		{
-			// todo
+			StringViewT sw1(LITERAL("Hello, World"));
+			StringViewT sw2(LITERAL("Hello, World"), 5);
+			StringViewT sw3(LITERAL("Hello"));
+			auto s = LITERAL("Hello");
+
+			VERIFY(eastl::hash<StringViewT>{}(sw1) != eastl::hash<StringViewT>{}(sw2));
+			VERIFY(eastl::hash<StringViewT>{}(sw2) == eastl::hash<StringViewT>{}(sw3));
+			VERIFY(eastl::hash<StringViewT>{}(sw3) == eastl::hash<decltype(s)>{}(s));
 		}
 	}
 	return nErrorCount;
