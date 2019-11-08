@@ -16,6 +16,31 @@ int TEST_STRING_NAME()
 			VERIFY(sw.size() == sw.length());
 		}
 
+		// User-reported regression:  constructing string_view from a nullptr, NULL, 0
+		{
+			{
+				StringViewT sw(nullptr);
+				VERIFY(sw.empty());
+				VERIFY(sw.data() == nullptr);
+				VERIFY(sw.size() == 0);
+				VERIFY(sw.size() == sw.length());
+			}
+			{
+				StringViewT sw(0);
+				VERIFY(sw.empty());
+				VERIFY(sw.data() == nullptr);
+				VERIFY(sw.size() == 0);
+				VERIFY(sw.size() == sw.length());
+			}
+			{
+				StringViewT sw(NULL);
+				VERIFY(sw.empty());
+				VERIFY(sw.data() == nullptr);
+				VERIFY(sw.size() == 0);
+				VERIFY(sw.size() == sw.length());
+			}
+		}
+
 		// EA_CONSTEXPR basic_string_view(const basic_string_view& other) = default;
 		{
 			auto* pLiteral = LITERAL("Hello, World");
@@ -468,6 +493,23 @@ int TEST_STRING_NAME()
 			VERIFY(eastl::hash<StringViewT>{}(sw3) == eastl::hash<decltype(s)>{}(s));
 		}
 	}
+
+	{
+		StringViewT sw1(LITERAL("AAAAABBBBBCCCDDDDDEEEEEFFFGGH"));
+
+		VERIFY( sw1.starts_with(LITERAL('A')));
+		VERIFY(!sw1.starts_with(LITERAL('X')));
+		VERIFY( sw1.starts_with(LITERAL("AAAA")));
+		VERIFY( sw1.starts_with(StringViewT(LITERAL("AAAA"))));
+		VERIFY(!sw1.starts_with(LITERAL("AAAB")));
+
+		VERIFY( sw1.ends_with(LITERAL('H')));
+		VERIFY(!sw1.ends_with(LITERAL('X')));
+		VERIFY( sw1.ends_with(LITERAL("FGGH")));
+		VERIFY( sw1.ends_with(StringViewT(LITERAL("FGGH"))));
+		VERIFY(!sw1.ends_with(LITERAL("FGGH$")));
+	}
+
 	return nErrorCount;
 }
 
